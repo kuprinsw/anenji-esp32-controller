@@ -1,0 +1,842 @@
+<!DOCTYPE html>
+<html lang="uk">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>ANENJI Dashboard Preview (Dark Theme)</title>
+    <script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.0/dist/chart.umd.min.js"></script>
+    <style>
+        :root {
+          --primary-color: #2196F3;
+          --secondary-color: #1976D2;
+          --success-color: #4CAF50;
+          --warning-color: #FF9800;
+          --danger-color: #f44336;
+          --dark-bg: #1a1a1a;
+          --dark-card: #2d2d2d;
+          --dark-border: #404040;
+          --light-bg: #f5f5f5;
+          --light-card: #ffffff;
+          --light-border: #e0e0e0;
+          --text-dark: #333333;
+          --text-light: #eeeeee;
+          --text-secondary: #999999;
+          --transition: 0.3s ease;
+        }
+
+        body {
+          --bg-primary: var(--dark-bg);
+          --bg-card: var(--dark-card);
+          --border: var(--dark-border);
+          --text: var(--text-light);
+          --text-secondary-color: var(--text-secondary);
+          font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+          background-color: var(--bg-primary);
+          color: var(--text);
+          margin: 0;
+          padding: 0;
+          line-height: 1.6;
+        }
+
+        * {
+          margin: 0;
+          padding: 0;
+          box-sizing: border-box;
+        }
+
+        .container {
+          max-width: 1400px;
+          margin: 0 auto;
+          padding: 10px;
+        }
+
+        /* ===== HEADER ===== */
+        .header {
+          background: linear-gradient(135deg, var(--primary-color) 0%, var(--secondary-color) 100%);
+          color: white;
+          padding: 20px 0;
+          margin-bottom: 20px;
+          border-radius: 12px;
+          box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
+        }
+
+        .header-content {
+          display: flex;
+          justify-content: space-between;
+          align-items: center;
+          padding: 0 20px;
+        }
+
+        .logo {
+          font-size: 1.8rem;
+          font-weight: bold;
+          letter-spacing: 1px;
+        }
+
+        .connection-status {
+          display: flex;
+          align-items: center;
+          gap: 8px;
+          padding: 8px 15px;
+          background-color: rgba(255, 255, 255, 0.2);
+          border-radius: 20px;
+          font-size: 0.9rem;
+        }
+
+        .status-dot {
+          width: 10px;
+          height: 10px;
+          border-radius: 50%;
+          background-color: #4CAF50;
+          animation: pulse 2s infinite;
+        }
+
+        @keyframes pulse {
+          0%, 100% { opacity: 1; }
+          50% { opacity: 0.5; }
+        }
+
+        /* ===== DASHBOARD ===== */
+        .dashboard {
+          display: grid;
+          grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+          gap: 20px;
+          margin-bottom: 20px;
+        }
+
+        .card {
+          background-color: var(--bg-card);
+          border-radius: 12px;
+          padding: 20px;
+          box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
+          border: 1px solid var(--border);
+          transition: all 0.3s ease;
+        }
+
+        .card:hover {
+          transform: translateY(-2px);
+          box-shadow: 0 4px 16px rgba(0, 0, 0, 0.15);
+        }
+
+        .card-large {
+          grid-column: 1 / -1;
+        }
+
+        .card-title {
+          font-size: 1.3rem;
+          margin-bottom: 15px;
+          color: var(--primary-color);
+          border-bottom: 2px solid var(--primary-color);
+          padding-bottom: 10px;
+        }
+
+        /* ===== STATUS GRID ===== */
+        .status-grid {
+          display: grid;
+          grid-template-columns: repeat(auto-fit, minmax(150px, 1fr));
+          gap: 20px;
+        }
+
+        .status-item {
+          text-align: center;
+          padding: 15px;
+          background-color: var(--bg-primary);
+          border-radius: 8px;
+          border: 1px solid var(--border);
+        }
+
+        .status-value {
+          font-size: 2.5rem;
+          font-weight: bold;
+          color: var(--primary-color);
+          margin-bottom: 5px;
+        }
+
+        .status-label {
+          font-size: 0.85rem;
+          color: var(--text-secondary-color);
+          text-transform: uppercase;
+          letter-spacing: 0.5px;
+          margin-bottom: 10px;
+        }
+
+        .status-bar {
+          width: 100%;
+          height: 6px;
+          background-color: var(--border);
+          border-radius: 3px;
+          overflow: hidden;
+          margin-top: 10px;
+        }
+
+        .status-bar-fill {
+          height: 100%;
+          background: linear-gradient(90deg, #f44336, #FF9800, #4CAF50);
+          border-radius: 3px;
+          width: 75%;
+        }
+
+        .mode-badge {
+          display: inline-block;
+          padding: 6px 12px;
+          background-color: var(--primary-color);
+          color: white;
+          border-radius: 20px;
+          font-size: 0.85rem;
+          font-weight: bold;
+          margin-top: 10px;
+        }
+
+        /* ===== DATA GRID ===== */
+        .data-grid {
+          display: grid;
+          grid-template-columns: repeat(auto-fit, minmax(100px, 1fr));
+          gap: 15px;
+        }
+
+        .data-item {
+          background-color: var(--bg-primary);
+          padding: 15px;
+          border-radius: 8px;
+          border-left: 4px solid var(--primary-color);
+          text-align: center;
+        }
+
+        .data-label {
+          font-size: 0.8rem;
+          color: var(--text-secondary-color);
+          text-transform: uppercase;
+          letter-spacing: 0.5px;
+          margin-bottom: 8px;
+        }
+
+        .data-value {
+          font-size: 1.8rem;
+          font-weight: bold;
+          color: var(--primary-color);
+        }
+
+        /* ===== CONTROLS ===== */
+        .controls-grid {
+          display: grid;
+          grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+          gap: 15px;
+        }
+
+        .control-group {
+          display: flex;
+          flex-direction: column;
+        }
+
+        .control-group label {
+          font-weight: 600;
+          margin-bottom: 8px;
+          color: var(--text);
+        }
+
+        .control-select {
+          padding: 10px 12px;
+          border: 1px solid var(--border);
+          border-radius: 6px;
+          background-color: var(--bg-primary);
+          color: var(--text);
+          font-size: 1rem;
+          cursor: pointer;
+        }
+
+        /* ===== SWITCHES ===== */
+        .switches-grid {
+          display: grid;
+          grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+          gap: 15px;
+        }
+
+        .switch-item {
+          display: flex;
+          align-items: center;
+          gap: 12px;
+          padding: 12px;
+          background-color: var(--bg-primary);
+          border-radius: 8px;
+          border: 1px solid var(--border);
+        }
+
+        .switch {
+          position: relative;
+          display: inline-block;
+          width: 45px;
+          height: 24px;
+        }
+
+        .switch-input {
+          opacity: 0;
+          width: 0;
+          height: 0;
+        }
+
+        .switch-slider {
+          position: absolute;
+          cursor: pointer;
+          top: 0;
+          left: 0;
+          right: 0;
+          bottom: 0;
+          background-color: #ccc;
+          transition: 0.3s;
+          border-radius: 24px;
+        }
+
+        .switch-slider:before {
+          position: absolute;
+          content: "";
+          height: 18px;
+          width: 18px;
+          left: 3px;
+          bottom: 3px;
+          background-color: white;
+          transition: 0.3s;
+          border-radius: 50%;
+        }
+
+        .switch-input:checked + .switch-slider {
+          background-color: var(--primary-color);
+        }
+
+        .switch-input:checked + .switch-slider:before {
+          transform: translateX(21px);
+        }
+
+        .switch-label {
+          color: var(--text);
+          font-size: 0.95rem;
+        }
+
+        /* ===== SLIDERS ===== */
+        .sliders-grid {
+          display: grid;
+          grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+          gap: 20px;
+        }
+
+        .slider-item label {
+          display: block;
+          font-weight: 600;
+          margin-bottom: 10px;
+          color: var(--text);
+        }
+
+        .slider-container {
+          display: flex;
+          gap: 15px;
+          align-items: center;
+        }
+
+        .slider {
+          flex: 1;
+          height: 6px;
+          border-radius: 3px;
+          background: var(--border);
+          outline: none;
+          -webkit-appearance: none;
+          appearance: none;
+        }
+
+        .slider::-webkit-slider-thumb {
+          -webkit-appearance: none;
+          appearance: none;
+          width: 20px;
+          height: 20px;
+          border-radius: 50%;
+          background: var(--primary-color);
+          cursor: pointer;
+          box-shadow: 0 2px 4px rgba(0, 0, 0, 0.2);
+        }
+
+        .slider::-moz-range-thumb {
+          width: 20px;
+          height: 20px;
+          border-radius: 50%;
+          background: var(--primary-color);
+          cursor: pointer;
+          border: none;
+          box-shadow: 0 2px 4px rgba(0, 0, 0, 0.2);
+        }
+
+        .slider-value {
+          min-width: 70px;
+          text-align: right;
+          font-weight: bold;
+          color: var(--primary-color);
+        }
+
+        /* ===== BUTTONS ===== */
+        .buttons-grid {
+          display: grid;
+          grid-template-columns: repeat(auto-fit, minmax(150px, 1fr));
+          gap: 12px;
+        }
+
+        .btn {
+          padding: 12px 20px;
+          border: none;
+          border-radius: 6px;
+          font-size: 1rem;
+          font-weight: 600;
+          cursor: pointer;
+          text-transform: uppercase;
+          letter-spacing: 0.5px;
+        }
+
+        .btn-primary {
+          background-color: var(--primary-color);
+          color: white;
+        }
+
+        .btn-primary:hover {
+          background-color: var(--secondary-color);
+          transform: translateY(-2px);
+          box-shadow: 0 4px 12px rgba(33, 150, 243, 0.3);
+        }
+
+        .btn-secondary {
+          background-color: var(--success-color);
+          color: white;
+        }
+
+        .btn-secondary:hover {
+          background-color: #45a049;
+          transform: translateY(-2px);
+          box-shadow: 0 4px 12px rgba(76, 175, 80, 0.3);
+        }
+
+        .btn-warning {
+          background-color: var(--warning-color);
+          color: white;
+        }
+
+        .btn-warning:hover {
+          background-color: #f57c00;
+          transform: translateY(-2px);
+          box-shadow: 0 4px 12px rgba(255, 152, 0, 0.3);
+        }
+
+        /* ===== CHARTS ===== */
+        .chart-container {
+          position: relative;
+          height: 300px;
+          margin-top: 20px;
+        }
+
+        /* ===== ALERTS ===== */
+        .card-alert {
+          grid-column: 1 / -1;
+        }
+
+        .alert-content {
+          display: grid;
+          grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+          gap: 20px;
+        }
+
+        .alert-group h3 {
+          color: var(--warning-color);
+          margin-bottom: 10px;
+          font-size: 1rem;
+        }
+
+        .alert-list {
+          background-color: var(--bg-primary);
+          padding: 15px;
+          border-radius: 6px;
+          border-left: 4px solid var(--warning-color);
+          min-height: 40px;
+          color: var(--text);
+          font-size: 0.9rem;
+          line-height: 1.8;
+        }
+
+        .alert-list.success {
+          color: var(--success-color);
+          border-left-color: var(--success-color);
+        }
+
+        .alert-list.error {
+          color: var(--danger-color);
+          border-left-color: var(--danger-color);
+        }
+
+        /* ===== FOOTER ===== */
+        .footer {
+          text-align: center;
+          padding: 20px;
+          color: var(--text-secondary-color);
+          border-top: 1px solid var(--border);
+          margin-top: 20px;
+          font-size: 0.85rem;
+        }
+
+        /* ===== RESPONSIVE ===== */
+        @media (max-width: 768px) {
+          .dashboard {
+            grid-template-columns: 1fr;
+          }
+          .status-grid {
+            grid-template-columns: 1fr;
+          }
+          .status-value {
+            font-size: 2rem;
+          }
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <!-- HEADER -->
+        <header class="header">
+            <div class="header-content">
+                <h1 class="logo">⚡ ANENJI</h1>
+                <div class="connection-status">
+                    <span class="status-dot"></span>
+                    <span>✓ Підключено</span>
+                </div>
+            </div>
+        </header>
+
+        <!-- DASHBOARD -->
+        <main class="dashboard">
+            <!-- STATUS CARD -->
+            <section class="card card-large">
+                <div class="status-grid">
+                    <div class="status-item">
+                        <div class="status-value">75%</div>
+                        <div class="status-label">SOC Батареї</div>
+                        <div class="status-bar">
+                            <div class="status-bar-fill" style="width: 75%"></div>
+                        </div>
+                    </div>
+                    <div class="status-item">
+                        <div class="status-value">Mains</div>
+                        <div class="status-label">Режим роботи</div>
+                        <div class="mode-badge">🟢 Від мережі</div>
+                    </div>
+                    <div class="status-item">
+                        <div class="status-value">42°C</div>
+                        <div class="status-label">Температура</div>
+                        <div style="width: 100%; height: 4px; background-color: var(--border); border-radius: 2px; margin-top: 10px; background-color: #4CAF50;"></div>
+                    </div>
+                </div>
+            </section>
+
+            <!-- МЕРЕЖА (AC) -->
+            <section class="card">
+                <h2 class="card-title">🌐 Мережа (AC)</h2>
+                <div class="data-grid">
+                    <div class="data-item">
+                        <div class="data-label">Напруга</div>
+                        <div class="data-value">227 V</div>
+                    </div>
+                    <div class="data-item">
+                        <div class="data-label">Частота</div>
+                        <div class="data-value">50.0 Hz</div>
+                    </div>
+                    <div class="data-item">
+                        <div class="data-label">Потужність</div>
+                        <div class="data-value">2100 W</div>
+                    </div>
+                </div>
+            </section>
+
+            <!-- БАТАРЕЯ -->
+            <section class="card">
+                <h2 class="card-title">🔋 Батарея</h2>
+                <div class="data-grid">
+                    <div class="data-item">
+                        <div class="data-label">Напруга</div>
+                        <div class="data-value">48.2 V</div>
+                    </div>
+                    <div class="data-item">
+                        <div class="data-label">Струм</div>
+                        <div class="data-value">12.5 A</div>
+                    </div>
+                    <div class="data-item">
+                        <div class="data-label">Потужність</div>
+                        <div class="data-value">600 W</div>
+                    </div>
+                </div>
+            </section>
+
+            <!-- ВИХІД -->
+            <section class="card">
+                <h2 class="card-title">📤 Вихід</h2>
+                <div class="data-grid">
+                    <div class="data-item">
+                        <div class="data-label">Напруга</div>
+                        <div class="data-value">230 V</div>
+                    </div>
+                    <div class="data-item">
+                        <div class="data-label">Струм</div>
+                        <div class="data-value">8.2 A</div>
+                    </div>
+                    <div class="data-item">
+                        <div class="data-label">Потужність</div>
+                        <div class="data-value">1886 W</div>
+                    </div>
+                </div>
+            </section>
+
+            <!-- СОНЯЧНІ ПАНЕЛІ -->
+            <section class="card">
+                <h2 class="card-title">☀️ Сонячні панелі</h2>
+                <div class="data-grid">
+                    <div class="data-item">
+                        <div class="data-label">Напруга</div>
+                        <div class="data-value">380 V</div>
+                    </div>
+                    <div class="data-item">
+                        <div class="data-label">Струм</div>
+                        <div class="data-value">15.3 A</div>
+                    </div>
+                    <div class="data-item">
+                        <div class="data-label">Потужність</div>
+                        <div class="data-value">5820 W</div>
+                    </div>
+                </div>
+            </section>
+
+            <!-- ГРАФІК ПОТУЖНОСТІ -->
+            <section class="card card-large">
+                <h2 class="card-title">📊 Графік потужності (останні 24 години)</h2>
+                <div class="chart-container">
+                    <canvas id="powerChart"></canvas>
+                </div>
+            </section>
+
+            <!-- ГРАФІК SOC -->
+            <section class="card card-large">
+                <h2 class="card-title">📈 Прогноз SOC батареї</h2>
+                <div class="chart-container">
+                    <canvas id="socChart"></canvas>
+                </div>
+            </section>
+
+            <!-- УПРАВЛІННЯ -->
+            <section class="card card-large">
+                <h2 class="card-title">⚙️ Управління</h2>
+                <div class="controls-grid">
+                    <div class="control-group">
+                        <label for="outputMode">Режим виходу</label>
+                        <select class="control-select">
+                            <option>Single (Обрано)</option>
+                            <option>Parallel</option>
+                            <option>Phase P1</option>
+                            <option>Phase P2</option>
+                        </select>
+                    </div>
+                    <div class="control-group">
+                        <label for="outputPriority">Пріоритет джерела</label>
+                        <select class="control-select">
+                            <option>Utility-PV-Battery (Обрано)</option>
+                            <option>PV-Utility-Battery</option>
+                            <option>PV-Battery-Utility</option>
+                        </select>
+                    </div>
+                    <div class="control-group">
+                        <label for="batteryType">Тип батареї</label>
+                        <select class="control-select">
+                            <option>Li1 (Обрано)</option>
+                            <option>Li2</option>
+                            <option>AGM</option>
+                            <option>FLD</option>
+                        </select>
+                    </div>
+                </div>
+            </section>
+
+            <!-- ПЕРЕМИКАЧІ -->
+            <section class="card card-large">
+                <h2 class="card-title">🔘 Перемикачі</h2>
+                <div class="switches-grid">
+                    <div class="switch-item">
+                        <label class="switch">
+                            <input type="checkbox" class="switch-input" checked>
+                            <span class="switch-slider"></span>
+                        </label>
+                        <span class="switch-label">Режим енергозбереження</span>
+                    </div>
+                    <div class="switch-item">
+                        <label class="switch">
+                            <input type="checkbox" class="switch-input" checked>
+                            <span class="switch-slider"></span>
+                        </label>
+                        <span class="switch-label">Авто перезавантаження при перевантаженні</span>
+                    </div>
+                    <div class="switch-item">
+                        <label class="switch">
+                            <input type="checkbox" class="switch-input">
+                            <span class="switch-slider"></span>
+                        </label>
+                        <span class="switch-label">Авто перезавантаження при перегріві</span>
+                    </div>
+                </div>
+            </section>
+
+            <!-- СЛАЙДЕРИ -->
+            <section class="card card-large">
+                <h2 class="card-title">🎚️ Налаштування</h2>
+                <div class="sliders-grid">
+                    <div class="slider-item">
+                        <label>Макс. струм зарядки</label>
+                        <div class="slider-container">
+                            <input type="range" min="0" max="100" value="50" class="slider">
+                            <span class="slider-value">50 A</span>
+                        </div>
+                    </div>
+                    <div class="slider-item">
+                        <label>Вихідна напруга</label>
+                        <div class="slider-container">
+                            <input type="range" min="180" max="270" value="220" class="slider">
+                            <span class="slider-value">220 V</span>
+                        </div>
+                    </div>
+                </div>
+            </section>
+
+            <!-- КНОПКИ ДІЙ -->
+            <section class="card card-large">
+                <h2 class="card-title">🎮 Дії</h2>
+                <div class="buttons-grid">
+                    <button class="btn btn-primary">Вихід з помилки</button>
+                    <button class="btn btn-secondary">Перезавантажити</button>
+                    <button class="btn btn-warning">Оновити дані</button>
+                </div>
+            </section>
+
+            <!-- СТАТУС -->
+            <section class="card card-large card-alert">
+                <h2 class="card-title">⚠️ Статус</h2>
+                <div class="alert-content">
+                    <div>
+                        <h3>Помилки</h3>
+                        <div class="alert-list success">
+                            ✅ Немає помилок
+                        </div>
+                    </div>
+                    <div>
+                        <h3>Попередження</h3>
+                        <div class="alert-list success">
+                            ✅ Немає попереджень
+                        </div>
+                    </div>
+                </div>
+            </section>
+        </main>
+
+        <!-- FOOTER -->
+        <footer class="footer">
+            <p>ANENJI Inverter Controller | Останнє оновлення: 14:32:45</p>
+            <p>NodeMCU v2 | WiFi Signal: -45 dBm | Uptime: 12h 34m</p>
+        </footer>
+    </div>
+
+    <script>
+        // Power Chart
+        const powerCtx = document.getElementById('powerChart').getContext('2d');
+        new Chart(powerCtx, {
+            type: 'line',
+            data: {
+                labels: Array(24).fill(''),
+                datasets: [
+                    {
+                        label: 'Сонячні панелі (W)',
+                        data: [0, 500, 1200, 2100, 3500, 4800, 5820, 6000, 5500, 4200, 2800, 1500, 800, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0],
+                        borderColor: '#FF9800',
+                        backgroundColor: 'rgba(255, 152, 0, 0.1)',
+                        tension: 0.4,
+                        fill: true
+                    },
+                    {
+                        label: 'Вихід (W)',
+                        data: [500, 600, 700, 800, 1000, 1500, 1886, 2000, 1800, 1500, 1200, 800, 600, 500, 450, 400, 400, 450, 500, 600, 700, 800, 900, 950],
+                        borderColor: '#2196F3',
+                        backgroundColor: 'rgba(33, 150, 243, 0.1)',
+                        tension: 0.4,
+                        fill: true
+                    },
+                    {
+                        label: 'Батарея (W)',
+                        data: [100, 150, 200, 250, 300, 350, 400, 450, 500, 550, 600, 580, 550, 500, 400, 300, 200, 150, 100, 50, 25, 10, 5, 0],
+                        borderColor: '#4CAF50',
+                        backgroundColor: 'rgba(76, 175, 80, 0.1)',
+                        tension: 0.4,
+                        fill: true
+                    }
+                ]
+            },
+            options: {
+                responsive: true,
+                maintainAspectRatio: false,
+                plugins: {
+                    legend: {
+                        labels: { color: '#eeeeee' }
+                    }
+                },
+                scales: {
+                    y: {
+                        ticks: { color: '#eeeeee' },
+                        grid: { color: '#404040' }
+                    },
+                    x: {
+                        ticks: { color: '#eeeeee' },
+                        grid: { color: '#404040' }
+                    }
+                }
+            }
+        });
+
+        // SOC Chart
+        const socCtx = document.getElementById('socChart').getContext('2d');
+        new Chart(socCtx, {
+            type: 'line',
+            data: {
+                labels: Array(24).fill(''),
+                datasets: [{
+                    label: 'SOC Батареї (%)',
+                    data: [75, 74, 73, 72, 71, 70, 69, 68, 68, 70, 73, 76, 78, 79, 78, 76, 75, 74, 75, 76, 77, 78, 79, 80],
+                    borderColor: '#2196F3',
+                    backgroundColor: 'rgba(33, 150, 243, 0.2)',
+                    tension: 0.4,
+                    fill: true,
+                    pointRadius: 0,
+                    borderWidth: 2
+                }]
+            },
+            options: {
+                responsive: true,
+                maintainAspectRatio: false,
+                plugins: {
+                    legend: { labels: { color: '#eeeeee' } }
+                },
+                scales: {
+                    y: {
+                        min: 0,
+                        max: 100,
+                        ticks: { color: '#eeeeee' },
+                        grid: { color: '#404040' }
+                    },
+                    x: {
+                        ticks: { color: '#eeeeee' },
+                        grid: { color: '#404040' }
+                    }
+                }
+            }
+        });
+
+        // Update slider values
+        document.querySelectorAll('.slider').forEach(slider => {
+            slider.addEventListener('input', function() {
+                this.nextElementSibling.textContent = this.value + (this.value < 100 ? ' A' : ' V');
+            });
+        });
+    </script>
+</body>
+</html>
