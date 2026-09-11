@@ -1,0 +1,180 @@
+<!DOCTYPE html>
+<html lang="uk">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>ANENJI ESP32 Controller</title>
+    <link rel="stylesheet" href="style.css">
+</head>
+<body>
+    <div class="container">
+        <header>
+            <h1>🔋 ANENJI Контролер</h1>
+            <div class="status-indicator" id="status">Завантаження...</div>
+        </header>
+
+        <div class="dashboard">
+            <!-- Основні параметри -->
+            <section class="card">
+                <h2>Статус</h2>
+                <div class="params-grid">
+                    <div class="param">
+                        <label>Режим роботи</label>
+                        <div class="value" id="operation_mode">-</div>
+                    </div>
+                    <div class="param">
+                        <label>SOC Батареї</label>
+                        <div class="value" id="battery_soc">-</div>
+                    </div>
+                    <div class="param">
+                        <label>Температура (Інвертор)</label>
+                        <div class="value" id="inverter_temperature">-</div>
+                    </div>
+                    <div class="param">
+                        <label>Температура (DCDC)</label>
+                        <div class="value" id="dcdc_temperature">-</div>
+                    </div>
+                </div>
+            </section>
+
+            <!-- Параметри мережі (AC) -->
+            <section class="card">
+                <h2>📶 Мережа (AC)</h2>
+                <div class="params-grid">
+                    <div class="param">
+                        <label>Напруга</label>
+                        <div class="value" id="ac_voltage">-</div>
+                    </div>
+                    <div class="param">
+                        <label>Частота</label>
+                        <div class="value" id="ac_frequency">-</div>
+                    </div>
+                    <div class="param">
+                        <label>Потужність</label>
+                        <div class="value" id="avg_mains_power">-</div>
+                    </div>
+                </div>
+            </section>
+
+            <!-- Параметри інвертора -->
+            <section class="card">
+                <h2>⚡ Інвертор</h2>
+                <div class="params-grid">
+                    <div class="param">
+                        <label>Вхідна напруга</label>
+                        <div class="value" id="inverter_voltage">-</div>
+                    </div>
+                    <div class="param">
+                        <label>Вхідний струм</label>
+                        <div class="value" id="inverter_current">-</div>
+                    </div>
+                    <div class="param">
+                        <label>Вхідна потужність</label>
+                        <div class="value" id="avg_inverter_power">-</div>
+                    </div>
+                    <div class="param">
+                        <label>Вихідна напруга</label>
+                        <div class="value" id="output_voltage">-</div>
+                    </div>
+                    <div class="param">
+                        <label>Вихідний струм</label>
+                        <div class="value" id="output_current">-</div>
+                    </div>
+                    <div class="param">
+                        <label>Вихідна потужність</label>
+                        <div class="value" id="output_active_power">-</div>
+                    </div>
+                </div>
+            </section>
+
+            <!-- Параметри батареї -->
+            <section class="card">
+                <h2>🔋 Батарея</h2>
+                <div class="params-grid">
+                    <div class="param">
+                        <label>Напруга</label>
+                        <div class="value" id="battery_voltage">-</div>
+                    </div>
+                    <div class="param">
+                        <label>Струм</label>
+                        <div class="value" id="battery_current">-</div>
+                    </div>
+                    <div class="param">
+                        <label>Потужність</label>
+                        <div class="value" id="battery_power">-</div>
+                    </div>
+                </div>
+            </section>
+
+            <!-- Параметри сонячних панелей -->
+            <section class="card">
+                <h2>☀️ Сонячні панелі</h2>
+                <div class="params-grid">
+                    <div class="param">
+                        <label>Напруга</label>
+                        <div class="value" id="pv_voltage">-</div>
+                    </div>
+                    <div class="param">
+                        <label>Струм</label>
+                        <div class="value" id="pv_current">-</div>
+                    </div>
+                    <div class="param">
+                        <label>Потужність</label>
+                        <div class="value" id="pv_power">-</div>
+                    </div>
+                    <div class="param">
+                        <label>Навантаження</label>
+                        <div class="value" id="load_percentage">-</div>
+                    </div>
+                </div>
+            </section>
+
+            <!-- Налаштування -->
+            <section class="card">
+                <h2>⚙️ Налаштування</h2>
+                <div class="settings-grid">
+                    <div class="setting">
+                        <label for="output_mode">Режим виходу</label>
+                        <select id="output_mode">
+                            <option value="">Завантаження...</option>
+                        </select>
+                    </div>
+                    <div class="setting">
+                        <label for="output_priority">Пріоритет джерела</label>
+                        <select id="output_priority">
+                            <option value="">Завантаження...</option>
+                        </select>
+                    </div>
+                    <div class="setting">
+                        <label for="battery_type">Тип батареї</label>
+                        <select id="battery_type">
+                            <option value="">Завантаження...</option>
+                        </select>
+                    </div>
+                </div>
+            </section>
+
+            <!-- Помилки та попередження -->
+            <section class="card alert-card">
+                <h2>⚠️ Статус</h2>
+                <div class="alert-content">
+                    <div class="alert-group">
+                        <h3>Коди помилок</h3>
+                        <div class="alert-list" id="fault_codes">Немає помилок</div>
+                    </div>
+                    <div class="alert-group">
+                        <h3>Попередження</h3>
+                        <div class="alert-list" id="warning_codes">Немає попережень</div>
+                    </div>
+                </div>
+            </section>
+        </div>
+
+        <footer>
+            <p>ANENJI ESP32 Controller | Останнє оновлення: <span id="last_update">-</span></p>
+        </footer>
+    </div>
+
+    <script src="script.js"></script>
+</body>
+</html>
