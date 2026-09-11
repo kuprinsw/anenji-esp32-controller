@@ -1,0 +1,254 @@
+<!DOCTYPE html>
+<html lang="uk">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>ANENJI Inverter Dashboard</title>
+    <link rel="stylesheet" href="style.css">
+    <script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.0/dist/chart.umd.min.js"></script>
+</head>
+<body>
+    <div class="container">
+        <!-- HEADER -->
+        <header class="header">
+            <div class="header-content">
+                <h1 class="logo">⚡ ANENJI</h1>
+                <div class="header-right">
+                    <div class="connection-status" id="connectionStatus">
+                        <span class="status-dot"></span>
+                        <span id="statusText">Підключення...</span>
+                    </div>
+                    <button class="theme-toggle" id="themeToggle" title="Перемикнути тему">
+                        🌙
+                    </button>
+                </div>
+            </div>
+        </header>
+
+        <!-- MAIN DASHBOARD -->
+        <main class="dashboard">
+            <!-- СТАТУС БЛОК -->
+            <section class="card card-large status-card">
+                <div class="status-grid">
+                    <div class="status-item">
+                        <div class="status-value" id="socValue">-</div>
+                        <div class="status-label">SOC Батареї</div>
+                        <div class="status-bar">
+                            <div class="status-bar-fill" id="socBar" style="width: 0%"></div>
+                        </div>
+                    </div>
+                    <div class="status-item">
+                        <div class="status-value" id="modeValue">-</div>
+                        <div class="status-label">Режим роботи</div>
+                        <div class="mode-badge" id="modeBadge">-</div>
+                    </div>
+                    <div class="status-item">
+                        <div class="status-value" id="tempValue">-</div>
+                        <div class="status-label">Температура</div>
+                        <div class="temp-indicator" id="tempIndicator"></div>
+                    </div>
+                </div>
+            </section>
+
+            <!-- БАТАРЕЯ -->
+            <section class="card">
+                <h2 class="card-title">🔋 Батарея</h2>
+                <div class="data-grid">
+                    <div class="data-item">
+                        <div class="data-label">Напруга</div>
+                        <div class="data-value" id="batteryVoltage">-</div>
+                    </div>
+                    <div class="data-item">
+                        <div class="data-label">Струм</div>
+                        <div class="data-value" id="batteryCurrent">-</div>
+                    </div>
+                    <div class="data-item">
+                        <div class="data-label">Потужність</div>
+                        <div class="data-value" id="batteryPower">-</div>
+                    </div>
+                </div>
+            </section>
+
+            <!-- СОНЯЧНІ ПАНЕЛІ -->
+            <section class="card">
+                <h2 class="card-title">☀️ Сонячні панелі</h2>
+                <div class="data-grid">
+                    <div class="data-item">
+                        <div class="data-label">Напруга</div>
+                        <div class="data-value" id="pvVoltage">-</div>
+                    </div>
+                    <div class="data-item">
+                        <div class="data-label">Струм</div>
+                        <div class="data-value" id="pvCurrent">-</div>
+                    </div>
+                    <div class="data-item">
+                        <div class="data-label">Потужність</div>
+                        <div class="data-value" id="pvPower">-</div>
+                    </div>
+                </div>
+            </section>
+
+            <!-- ВИХІД -->
+            <section class="card">
+                <h2 class="card-title">📤 Вихід</h2>
+                <div class="data-grid">
+                    <div class="data-item">
+                        <div class="data-label">Напруга</div>
+                        <div class="data-value" id="outputVoltage">-</div>
+                    </div>
+                    <div class="data-item">
+                        <div class="data-label">Струм</div>
+                        <div class="data-value" id="outputCurrent">-</div>
+                    </div>
+                    <div class="data-item">
+                        <div class="data-label">Потужність</div>
+                        <div class="data-value" id="outputPower">-</div>
+                    </div>
+                </div>
+            </section>
+
+            <!-- МЕРЕЖА (AC) -->
+            <section class="card">
+                <h2 class="card-title">🌐 Мережа (AC)</h2>
+                <div class="data-grid">
+                    <div class="data-item">
+                        <div class="data-label">Напруга</div>
+                        <div class="data-value" id="acVoltage">-</div>
+                    </div>
+                    <div class="data-item">
+                        <div class="data-label">Частота</div>
+                        <div class="data-value" id="acFrequency">-</div>
+                    </div>
+                    <div class="data-item">
+                        <div class="data-label">Потужність</div>
+                        <div class="data-value" id="acPower">-</div>
+                    </div>
+                </div>
+            </section>
+
+            <!-- ГРАФІК ПОТУЖНОСТІ -->
+            <section class="card card-full">
+                <h2 class="card-title">📊 Графік потужності (остаідні 24 години)</h2>
+                <div class="chart-container">
+                    <canvas id="powerChart"></canvas>
+                </div>
+            </section>
+
+            <!-- ГРАФІК SOC -->
+            <section class="card card-full">
+                <h2 class="card-title">📈 Прогноз SOC батареї</h2>
+                <div class="chart-container">
+                    <canvas id="socChart"></canvas>
+                </div>
+            </section>
+
+            <!-- УПРАВЛІННЯ -->
+            <section class="card">
+                <h2 class="card-title">⚙️ Управління</h2>
+                <div class="controls-grid">
+                    <div class="control-group">
+                        <label for="outputMode">Режим виходу</label>
+                        <select id="outputMode" class="control-select">
+                            <option value="">Завантаження...</option>
+                        </select>
+                    </div>
+                    <div class="control-group">
+                        <label for="outputPriority">Пріоритет джерела</label>
+                        <select id="outputPriority" class="control-select">
+                            <option value="">Завантаження...</option>
+                        </select>
+                    </div>
+                    <div class="control-group">
+                        <label for="batteryType">Тип батареї</label>
+                        <select id="batteryType" class="control-select">
+                            <option value="">Завантаження...</option>
+                        </select>
+                    </div>
+                </div>
+            </section>
+
+            <!-- ПЕРЕМИКАЧІ -->
+            <section class="card">
+                <h2 class="card-title">🔘 Перемикачі</h2>
+                <div class="switches-grid">
+                    <div class="switch-item">
+                        <label class="switch">
+                            <input type="checkbox" id="energySavingSwitch" class="switch-input">
+                            <span class="switch-slider"></span>
+                        </label>
+                        <span class="switch-label">Режим енергозбереження</span>
+                    </div>
+                    <div class="switch-item">
+                        <label class="switch">
+                            <input type="checkbox" id="overloadRestartSwitch" class="switch-input">
+                            <span class="switch-slider"></span>
+                        </label>
+                        <span class="switch-label">Авто перезавантаження при перевантаженні</span>
+                    </div>
+                    <div class="switch-item">
+                        <label class="switch">
+                            <input type="checkbox" id="tempRestartSwitch" class="switch-input">
+                            <span class="switch-slider"></span>
+                        </label>
+                        <span class="switch-label">Авто перезавантаження при перегріві</span>
+                    </div>
+                </div>
+            </section>
+
+            <!-- СЛАЙДЕРИ -->
+            <section class="card">
+                <h2 class="card-title">🎚️ Налаштування</h2>
+                <div class="sliders-grid">
+                    <div class="slider-item">
+                        <label for="maxChargingCurrent">Макс. струм зарядки</label>
+                        <div class="slider-container">
+                            <input type="range" id="maxChargingCurrent" min="0" max="100" value="50" class="slider">
+                            <span class="slider-value" id="maxChargingCurrentValue">-</span>
+                        </div>
+                    </div>
+                    <div class="slider-item">
+                        <label for="outputVoltage">Вихідна напруга</label>
+                        <div class="slider-container">
+                            <input type="range" id="outputVoltage" min="180" max="270" value="220" class="slider">
+                            <span class="slider-value" id="outputVoltageValue">-</span>
+                        </div>
+                    </div>
+                </div>
+            </section>
+
+            <!-- КНОПКИ ДІЙ -->
+            <section class="card">
+                <h2 class="card-title">🎯 Дії</h2>
+                <div class="buttons-grid">
+                    <button class="btn btn-primary" id="exitFaultBtn">Вихід з помилки</button>
+                    <button class="btn btn-secondary" id="restartBtn">Перезавантажити</button>
+                    <button class="btn btn-warning" id="refreshBtn">Оновити дані</button>
+                </div>
+            </section>
+
+            <!-- СТАТУС ПОМИЛОК -->
+            <section class="card card-alert">
+                <h2 class="card-title">⚠️ Статус</h2>
+                <div class="alert-content">
+                    <div class="alert-group">
+                        <h3>Помилки</h3>
+                        <div class="alert-list" id="faultList">Немає помилок</div>
+                    </div>
+                    <div class="alert-group">
+                        <h3>Попередження</h3>
+                        <div class="alert-list" id="warningList">Немає попережень</div>
+                    </div>
+                </div>
+            </section>
+        </main>
+
+        <!-- FOOTER -->
+        <footer class="footer">
+            <p>ANENJI Inverter Controller | Останнє оновлення: <span id="lastUpdate">-</span></p>
+            <p>NodeMCU v2 | WiFi Signal: <span id="wifiSignal">-</span></p>
+        </footer>
+    </div>
+
+    <script src="script.js"></script>
+</body>
+</html>
